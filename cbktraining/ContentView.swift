@@ -8,7 +8,9 @@ private func currentTrainingDayIndex(calendar: Calendar = .current, date: Date =
 struct ContentView: View {
     @State private var dayIndex: Int = currentTrainingDayIndex()
     @AppStorage("cbk_selected_week_index") private var weekIndex: Int = 0
+    @AppStorage("cbk_selected_model_id") private var selectedModelID: String = CoachModelOption.defaultID
     @State private var expanded: Set<String> = []
+    @State private var isShowingSettings = false
 
     private var day: TrainingDay { TrainingPlan.days[dayIndex] }
 
@@ -39,12 +41,20 @@ struct ContentView: View {
 
             BottomNavView(
                 onPrev: { withAnimation { dayIndex = (dayIndex + 6) % 7; expanded.removeAll() } },
+                onSettings: { isShowingSettings = true },
                 onNext: { withAnimation { dayIndex = (dayIndex + 1) % 7; expanded.removeAll() } }
             )
         }
         .foregroundStyle(Theme.textPrimary)
+        .sheet(isPresented: $isShowingSettings) {
+            SettingsView(selectedModelID: $selectedModelID)
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
+                .presentationBackground(Theme.backgroundTop)
+        }
         .onAppear {
             weekIndex = clampedWeekIndex(weekIndex)
+            selectedModelID = CoachModelOption.validID(selectedModelID)
         }
     }
 
@@ -60,6 +70,133 @@ struct ContentView: View {
             .frame(maxWidth: .infinity)
             .padding(.top, 8)
             .padding(.horizontal, 20)
+    }
+}
+
+// MARK: - Settings
+
+struct CoachModelOption: Identifiable, Hashable {
+    static let defaultID = "balanced"
+
+    let id: String
+    let name: String
+    let detail: String
+
+    static let all: [CoachModelOption] = [
+        CoachModelOption(
+            id: "balanced",
+            name: "Balanced",
+            detail: "General coaching for strength, volleyball, and recovery."
+        ),
+        CoachModelOption(
+            id: "strength",
+            name: "Strength focus",
+            detail: "Prioritizes gym progression, load, and RPE guidance."
+        ),
+        CoachModelOption(
+            id: "vertical",
+            name: "Vertical jump",
+            detail: "Prioritizes power, plyometrics, and jump performance."
+        ),
+        CoachModelOption(
+            id: "recovery",
+            name: "Recovery aware",
+            detail: "Prioritizes fatigue, soreness, and safer training choices."
+        ),
+    ]
+
+    static func validID(_ id: String) -> String {
+        all.contains { $0.id == id } ? id : defaultID
+    }
+}
+
+struct SettingsView: View {
+    @Environment(\.dismiss) private var dismiss
+    @Binding var selectedModelID: String
+
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                colors: [Theme.backgroundTop, Theme.backgroundBottom],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+
+            VStack(alignment: .leading, spacing: 18) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Settings")
+                            .font(AppFont.sans(22, weight: .semibold))
+                        Text("MODEL")
+                            .font(AppFont.mono(11))
+                            .tracking(0.8)
+                            .foregroundStyle(Theme.textFaint)
+                    }
+
+                    Spacer()
+
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(Theme.textSecondary)
+                            .frame(width: 36, height: 36)
+                            .liquidGlassSurface(cornerRadius: 18, tint: Theme.surfaceButton, shadowOpacity: 0.08)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Close settings")
+                }
+
+                VStack(spacing: 8) {
+                    ForEach(CoachModelOption.all) { option in
+                        modelButton(option)
+                    }
+                }
+
+                Spacer(minLength: 0)
+            }
+            .padding(20)
+        }
+        .foregroundStyle(Theme.textPrimary)
+    }
+
+    private func modelButton(_ option: CoachModelOption) -> some View {
+        let isSelected = selectedModelID == option.id
+
+        return Button {
+            selectedModelID = option.id
+        } label: {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .font(.system(size: 21))
+                    .foregroundStyle(isSelected ? Theme.accent : Theme.textSecondary)
+                    .padding(.top, 1)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(option.name)
+                        .font(AppFont.sans(15, weight: .semibold))
+                        .foregroundStyle(Theme.textPrimary)
+                    Text(option.detail)
+                        .font(AppFont.sans(12))
+                        .foregroundStyle(Theme.textMuted)
+                        .lineSpacing(3)
+                }
+
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 13)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .liquidGlassSurface(
+                cornerRadius: 16,
+                tint: isSelected ? Theme.accent.opacity(0.10) : Theme.surface,
+                stroke: isSelected ? Theme.accent.opacity(0.45) : Theme.dividerLow,
+                shadowOpacity: 0.08
+            )
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -170,12 +307,14 @@ struct DayPill: View {
 
 struct BottomNavView: View {
     let onPrev: () -> Void
+    let onSettings: () -> Void
     let onNext: () -> Void
 
     var body: some View {
         HStack(spacing: 10) {
-            navButton(title: "← prev", action: onPrev)
-            navButton(title: "next →", action: onNext)
+            navButton(systemName: "chevron.left", title: "prev", action: onPrev)
+            settingsButton
+            navButton(systemName: "chevron.right", title: "next", action: onNext)
         }
         .padding(8)
         .liquidGlassSurface(cornerRadius: 28, tint: Theme.surface)
@@ -183,16 +322,36 @@ struct BottomNavView: View {
         .padding(.bottom, 20)
     }
 
-    private func navButton(title: String, action: @escaping () -> Void) -> some View {
+    private func navButton(systemName: String, title: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Text(title)
-                .font(AppFont.sans(14, weight: .medium))
+            HStack(spacing: 6) {
+                if title == "next" {
+                    Text(title)
+                    Image(systemName: systemName)
+                } else {
+                    Image(systemName: systemName)
+                    Text(title)
+                }
+            }
+            .font(AppFont.sans(14, weight: .medium))
+            .foregroundStyle(Theme.textSecondary)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 13)
+            .liquidGlassSurface(cornerRadius: 20, tint: Theme.surfaceButton, shadowOpacity: 0.08)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var settingsButton: some View {
+        Button(action: onSettings) {
+            Image(systemName: "gearshape")
+                .font(.system(size: 16, weight: .semibold))
                 .foregroundStyle(Theme.textSecondary)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 13)
+                .frame(width: 48, height: 45)
                 .liquidGlassSurface(cornerRadius: 20, tint: Theme.surfaceButton, shadowOpacity: 0.08)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("Settings")
     }
 }
 
