@@ -13,6 +13,7 @@
 		B100000000000000000000A4 /* DayDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000000000000000000A4 /* DayDetailView.swift */; };
 		B100000000000000000000A5 /* ExerciseRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000000000000000000A5 /* ExerciseRowView.swift */; };
 		B100000000000000000000A6 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000000000000000000A6 /* Theme.swift */; };
+		B100000000000000000000A9 /* ExerciseLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000000000000000000A9 /* ExerciseLog.swift */; };
 		B100000000000000000000A7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A100000000000000000000A7 /* Assets.xcassets */; };
 		B100000000000000000000A8 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A100000000000000000000A8 /* Preview Assets.xcassets */; };
 /* End PBXBuildFile section */
@@ -24,6 +25,7 @@
 		A100000000000000000000A4 /* DayDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayDetailView.swift; sourceTree = "<group>"; };
 		A100000000000000000000A5 /* ExerciseRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseRowView.swift; sourceTree = "<group>"; };
 		A100000000000000000000A6 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		A100000000000000000000A9 /* ExerciseLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseLog.swift; sourceTree = "<group>"; };
 		A100000000000000000000A7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A100000000000000000000A8 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		A100000000000000000000AP /* cbktraining.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = cbktraining.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -57,6 +59,7 @@
 				A100000000000000000000A4 /* DayDetailView.swift */,
 				A100000000000000000000A5 /* ExerciseRowView.swift */,
 				A100000000000000000000A6 /* Theme.swift */,
+				A100000000000000000000A9 /* ExerciseLog.swift */,
 				A100000000000000000000A7 /* Assets.xcassets */,
 				C000000000000000000000C4 /* Preview Content */,
 			);
@@ -155,6 +158,7 @@
 				B100000000000000000000A4 /* DayDetailView.swift in Sources */,
 				B100000000000000000000A5 /* ExerciseRowView.swift in Sources */,
 				B100000000000000000000A6 /* Theme.swift in Sources */,
+				B100000000000000000000A9 /* ExerciseLog.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
