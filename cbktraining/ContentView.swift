@@ -50,10 +50,15 @@ struct ContentView: View {
 struct HeaderView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            HStack(alignment: .top) {
+            HStack(alignment: .center, spacing: 12) {
+                Image("LogoMark")
+                    .resizable()
+                    .renderingMode(.original)
+                    .frame(width: 38, height: 38)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+
                 Text("Training plan")
                     .font(AppFont.sans(22, weight: .semibold))
-                    .tracking(-0.4)
                 Spacer()
                 Text("Phase 2 — intermediate")
                     .font(AppFont.mono(11))
