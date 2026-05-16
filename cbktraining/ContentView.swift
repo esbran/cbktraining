@@ -44,8 +44,13 @@ struct ContentView: View {
         }
         .foregroundStyle(Theme.textPrimary)
         .onAppear {
-            weekIndex = min(max(weekIndex, 0), TrainingPlan.weekTypes.count - 1)
+            weekIndex = clampedWeekIndex(weekIndex)
         }
+    }
+
+    private func clampedWeekIndex(_ value: Int) -> Int {
+        let validRange = 0...(TrainingPlan.weekTypes.count - 1)
+        return min(max(value, validRange.lowerBound), validRange.upperBound)
     }
 
     private var weekLabel: some View {
