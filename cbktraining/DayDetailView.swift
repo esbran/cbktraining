@@ -147,6 +147,7 @@ struct DayDetailView: View {
                             let key = "\(dayIndex)-\(si)-\(ei)"
                             ExerciseRowView(
                                 exercise: ex,
+                                dayKey: day.name.lowercased(),
                                 isOpen: expanded.contains(key),
                                 onTap: {
                                     if expanded.contains(key) {
