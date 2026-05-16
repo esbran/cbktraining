@@ -7,7 +7,7 @@ private func currentTrainingDayIndex(calendar: Calendar = .current, date: Date =
 
 struct ContentView: View {
     @State private var dayIndex: Int = currentTrainingDayIndex()
-    @State private var weekIndex: Int = 0
+    @AppStorage("cbk_selected_week_index") private var weekIndex: Int = 0
     @State private var expanded: Set<String> = []
 
     private var day: TrainingDay { TrainingPlan.days[dayIndex] }
@@ -43,6 +43,14 @@ struct ContentView: View {
             )
         }
         .foregroundStyle(Theme.textPrimary)
+        .onAppear {
+            weekIndex = clampedWeekIndex(weekIndex)
+        }
+    }
+
+    private func clampedWeekIndex(_ value: Int) -> Int {
+        let validRange = 0...(TrainingPlan.weekTypes.count - 1)
+        return min(max(value, validRange.lowerBound), validRange.upperBound)
     }
 
     private var weekLabel: some View {

@@ -8,7 +8,9 @@ struct ExerciseRowView: View {
 
     @ObservedObject private var store = ExerciseLogStore.shared
     @State private var weightInput: String = ""
+    @State private var rpeInput: String = ""
     @FocusState private var weightFieldFocused: Bool
+    @FocusState private var rpeFieldFocused: Bool
 
     private var exerciseID: String { exercise.id.uuidString }
 
@@ -29,6 +31,13 @@ struct ExerciseRowView: View {
             .filter { $0.exerciseID == exerciseID && $0.weightKg != nil }
             .max(by: { $0.completedAt < $1.completedAt })?
             .weightKg
+    }
+
+    private var lastKnownRPE: Int? {
+        store.entries
+            .filter { $0.exerciseID == exerciseID && $0.rpe != nil }
+            .max(by: { $0.completedAt < $1.completedAt })?
+            .rpe
     }
 
     private var history: [ExerciseLogEntry] {
@@ -110,6 +119,9 @@ struct ExerciseRowView: View {
             if weightInput.isEmpty, let last = lastKnownWeight {
                 weightInput = last.formattedWeight
             }
+            if rpeInput.isEmpty, let last = lastKnownRPE {
+                rpeInput = "\(last)"
+            }
         }
     }
 
@@ -121,7 +133,7 @@ struct ExerciseRowView: View {
                 if isDone {
                     store.markUndone(exerciseID: exerciseID, dayKey: dayKey)
                 } else {
-                    store.markDone(exerciseID: exerciseID, dayKey: dayKey, weightKg: nil)
+                    store.markDone(exerciseID: exerciseID, dayKey: dayKey, weightKg: nil, rpe: nil)
                 }
             }
         } label: {
@@ -135,25 +147,40 @@ struct ExerciseRowView: View {
     }
 
     private func doneMetaRow(entry: ExerciseLogEntry) -> some View {
-        HStack(spacing: 8) {
-            HStack(spacing: 4) {
-                Image(systemName: "clock")
-                    .font(.system(size: 11))
-                Text("Ferdig kl. \(timeString(entry.completedAt))")
-                    .font(AppFont.mono(11))
-            }
-            .foregroundStyle(Theme.accent.opacity(0.85))
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 8) {
+                HStack(spacing: 4) {
+                    Image(systemName: "clock")
+                        .font(.system(size: 11))
+                    Text("Ferdig kl. \(timeString(entry.completedAt))")
+                        .font(AppFont.mono(11))
+                }
+                .foregroundStyle(Theme.accent.opacity(0.85))
 
-            if let w = entry.weightKg {
-                Text("\(w.formattedWeight) kg")
-                    .font(AppFont.mono(11, weight: .medium))
-                    .foregroundStyle(Theme.accent)
+                if let w = entry.weightKg {
+                    Text("\(w.formattedWeight) kg")
+                        .font(AppFont.mono(11, weight: .medium))
+                        .foregroundStyle(Theme.accent)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 2)
+                        .background(Theme.accent.opacity(0.18))
+                        .clipShape(Capsule())
+                        .overlay(
+                            Capsule().stroke(Theme.accent.opacity(0.35), lineWidth: 1)
+                        )
+                }
+            }
+
+            if let adjustment = entry.rpeAdjustment, let nextWeight = entry.suggestedNextWeight {
+                Text("Neste: \(nextWeight.formattedWeight) kg (\(adjustment.label))")
+                    .font(AppFont.mono(11))
+                    .foregroundStyle(color(for: adjustment))
                     .padding(.horizontal, 8)
                     .padding(.vertical, 2)
-                    .background(Theme.accent.opacity(0.18))
+                    .background(color(for: adjustment).opacity(0.16))
                     .clipShape(Capsule())
                     .overlay(
-                        Capsule().stroke(Theme.accent.opacity(0.35), lineWidth: 1)
+                        Capsule().stroke(color(for: adjustment).opacity(0.35), lineWidth: 1)
                     )
             }
         }
@@ -165,7 +192,6 @@ struct ExerciseRowView: View {
                 Text("Vekt (kg)")
                     .font(AppFont.sans(13))
                     .foregroundStyle(Theme.textSecondary)
-                Spacer()
                 TextField("0", text: $weightInput)
                     .keyboardType(.decimalPad)
                     .multilineTextAlignment(.trailing)
@@ -181,13 +207,34 @@ struct ExerciseRowView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                     .font(AppFont.mono(13))
                     .foregroundStyle(Theme.textPrimary)
+
+                Spacer()
+
+                Text("RPE")
+                    .font(AppFont.sans(13))
+                    .foregroundStyle(Theme.textSecondary)
+                TextField("1-10", text: $rpeInput)
+                    .keyboardType(.numberPad)
+                    .multilineTextAlignment(.trailing)
+                    .focused($rpeFieldFocused)
+                    .frame(width: 56)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Theme.surface)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Theme.dividerLow, lineWidth: 1)
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .font(AppFont.mono(13))
+                    .foregroundStyle(Theme.textPrimary)
             }
 
-            if !weightInput.trimmingCharacters(in: .whitespaces).isEmpty {
+            if hasSaveInput {
                 Button {
-                    saveWeight()
+                    saveEntry()
                 } label: {
-                    Text("Lagre vekt")
+                    Text("Lagre")
                         .font(AppFont.sans(13, weight: .semibold))
                         .foregroundStyle(Theme.accent)
                         .frame(maxWidth: .infinity)
@@ -236,15 +283,22 @@ struct ExerciseRowView: View {
 
     // MARK: - Actions
 
-    private func saveWeight() {
+    private var hasSaveInput: Bool {
+        !weightInput.trimmingCharacters(in: .whitespaces).isEmpty
+            || !rpeInput.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
+    private func saveEntry() {
         let normalized = weightInput
             .replacingOccurrences(of: ",", with: ".")
             .trimmingCharacters(in: .whitespaces)
-        let parsed = Double(normalized)
+        let parsedWeight = Double(normalized)
+        let parsedRPE = parseRPE(rpeInput)
         withAnimation(.spring()) {
-            store.markDone(exerciseID: exerciseID, dayKey: dayKey, weightKg: parsed)
+            store.markDone(exerciseID: exerciseID, dayKey: dayKey, weightKg: parsedWeight, rpe: parsedRPE)
         }
         weightFieldFocused = false
+        rpeFieldFocused = false
     }
 
     // MARK: - Formatters
@@ -261,5 +315,22 @@ struct ExerciseRowView: View {
         f.locale = Locale(identifier: "nb_NO")
         f.dateFormat = "dd.MM"
         return f.string(from: date)
+    }
+
+    private func parseRPE(_ value: String) -> Int? {
+        let trimmed = value.trimmingCharacters(in: .whitespaces)
+        guard let parsed = Int(trimmed) else { return nil }
+        return min(max(parsed, 1), 10)
+    }
+
+    private func color(for adjustment: RPEAdjustment) -> Color {
+        switch adjustment.tone {
+        case .positive:
+            return Theme.accent
+        case .neutral:
+            return Theme.accentYellow
+        case .negative:
+            return Theme.accentRed
+        }
     }
 }
