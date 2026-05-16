@@ -21,9 +21,6 @@ jobs:
       SCHEME: cbktraining
       TEAM_ID: J88WD7YZZ4
       BUNDLE_ID: no.cbk.training
-      ARCHIVE_PATH: ${{ runner.temp }}/cbktraining.xcarchive
-      EXPORT_PATH: ${{ runner.temp }}/export
-      ASC_KEY_DIR: ${{ runner.temp }}/private_keys
 
     steps:
       - name: Checkout
@@ -38,6 +35,7 @@ jobs:
           APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
         run: |
           set -euo pipefail
+          ASC_KEY_DIR="$RUNNER_TEMP/private_keys"
           mkdir -p "$ASC_KEY_DIR"
           printf '%s' "$APP_STORE_CONNECT_API_KEY" > "$ASC_KEY_DIR/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8"
           chmod 600 "$ASC_KEY_DIR/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8"
@@ -48,6 +46,8 @@ jobs:
           APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
         run: |
           set -euo pipefail
+          ARCHIVE_PATH="$RUNNER_TEMP/cbktraining.xcarchive"
+          ASC_KEY_DIR="$RUNNER_TEMP/private_keys"
           xcodebuild archive \
             -project "$PROJECT" \
             -scheme "$SCHEME" \
@@ -68,6 +68,9 @@ jobs:
           APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
         run: |
           set -euo pipefail
+          ARCHIVE_PATH="$RUNNER_TEMP/cbktraining.xcarchive"
+          EXPORT_PATH="$RUNNER_TEMP/export"
+          ASC_KEY_DIR="$RUNNER_TEMP/private_keys"
           xcodebuild -exportArchive \
             -archivePath "$ARCHIVE_PATH" \
             -exportOptionsPlist ci/ExportOptions.plist \
