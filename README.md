@@ -69,6 +69,26 @@ open cbktraining.xcodeproj
 
 Hit ⌘R to build and run.
 
+## TestFlight deployment
+
+The repository includes a GitHub Actions workflow at
+`.github/workflows/testflight.yml`. It runs whenever a commit is pushed to
+`main`, archives the iOS app, and uploads it to App Store Connect/TestFlight.
+
+Add these repository secrets in GitHub under
+`Settings > Secrets and variables > Actions`:
+
+```text
+APP_STORE_CONNECT_API_KEY_ID
+APP_STORE_CONNECT_API_ISSUER_ID
+APP_STORE_CONNECT_API_KEY
+```
+
+`APP_STORE_CONNECT_API_KEY` should contain the full contents of the downloaded
+`AuthKey_XXXXXXXXXX.p8` file from App Store Connect. The workflow uses the
+GitHub Actions run number as the app build number, so each push to `main`
+produces a unique TestFlight build.
+
 ## Pushing to GitHub
 
 After copying these files into your clone of `esbran/cbktraining`:
