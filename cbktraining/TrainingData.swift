@@ -3,10 +3,21 @@ import Foundation
 // MARK: - Models
 
 struct Exercise: Identifiable, Hashable {
-    let id = UUID()
+    let id: String
     let name: String
     let sets: String
     let hint: String
+
+    init(name: String, sets: String, hint: String) {
+        self.name = name
+        self.sets = sets
+        self.hint = hint
+        self.id = name
+            .lowercased()
+            .components(separatedBy: CharacterSet.alphanumerics.inverted)
+            .filter { !$0.isEmpty }
+            .joined(separator: "-")
+    }
 }
 
 struct TrainingSection: Identifiable, Hashable {

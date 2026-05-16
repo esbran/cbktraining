@@ -12,7 +12,7 @@ struct ExerciseRowView: View {
     @FocusState private var weightFieldFocused: Bool
     @FocusState private var rpeFieldFocused: Bool
 
-    private var exerciseID: String { exercise.id.uuidString }
+    private var exerciseID: String { exercise.id }
 
     private var isDone: Bool {
         store.isDoneToday(exerciseID: exerciseID, dayKey: dayKey)
