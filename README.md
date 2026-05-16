@@ -89,6 +89,14 @@ APP_STORE_CONNECT_API_KEY
 GitHub Actions run number as the app build number, so each push to `main`
 produces a unique TestFlight build.
 
+For automatic signing to work on GitHub Actions, the App Store Connect API key
+must belong to a user/key with permission to manage Certificates, Identifiers &
+Profiles, and the App Store Connect app must exist for bundle ID
+`no.cbk.training`. If the export step fails with `Cloud signing permission error`
+or `No profiles for 'no.cbk.training' were found`, create the app record/bundle
+identifier in Apple Developer/App Store Connect and use an API key with Admin or
+App Manager access plus Certificates, Identifiers & Profiles access enabled.
+
 ## Pushing to GitHub
 
 After copying these files into your clone of `esbran/cbktraining`:
