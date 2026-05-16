@@ -1,7 +1,12 @@
 import SwiftUI
 
+private func currentTrainingDayIndex(calendar: Calendar = .current, date: Date = .now) -> Int {
+    let weekday = calendar.component(.weekday, from: date)
+    return (weekday + 5) % TrainingPlan.days.count
+}
+
 struct ContentView: View {
-    @State private var dayIndex: Int = 1            // Default to Tuesday, mirroring the React default
+    @State private var dayIndex: Int = currentTrainingDayIndex()
     @State private var weekIndex: Int = 0
     @State private var expanded: Set<String> = []
 
@@ -109,6 +114,9 @@ struct DayPickerView: View {
                 withAnimation(.easeInOut) {
                     proxy.scrollTo(new, anchor: .center)
                 }
+            }
+            .onAppear {
+                proxy.scrollTo(selected, anchor: .center)
             }
         }
     }
