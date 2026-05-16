@@ -83,11 +83,7 @@ struct DayDetailView: View {
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Theme.surfaceElevated)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12).stroke(Theme.dividerLow, lineWidth: 1)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .liquidGlassSurface(cornerRadius: 16, tint: Theme.surfaceElevated, shadowOpacity: 0.12)
 
             HStack(spacing: 6) {
                 ForEach(Array(TrainingPlan.weekTypes.enumerated()), id: \.offset) { i, wt in
@@ -100,12 +96,12 @@ struct DayDetailView: View {
                             .foregroundStyle(selected ? Theme.accentBlue : Theme.textMuted)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 8)
-                            .background(selected ? Theme.accentBlue.opacity(0.12) : Theme.surface)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(selected ? Theme.accentBlue : Theme.dividerLow, lineWidth: 1)
+                            .liquidGlassSurface(
+                                cornerRadius: 14,
+                                tint: selected ? Theme.accentBlue.opacity(0.16) : Theme.surface,
+                                stroke: selected ? Theme.accentBlue.opacity(0.45) : Color.white.opacity(0.1),
+                                shadowOpacity: 0.08
                             )
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
                     .buttonStyle(.plain)
                 }
@@ -132,11 +128,7 @@ struct DayDetailView: View {
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 20)
         .padding(.vertical, 28)
-        .background(Theme.surface)
-        .overlay(
-            RoundedRectangle(cornerRadius: 12).stroke(Theme.dividerLow, lineWidth: 1)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .liquidGlassSurface(cornerRadius: 18, tint: Theme.surface)
     }
 
     // MARK: - Sections / exercises
@@ -185,11 +177,12 @@ struct DayDetailView: View {
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.accent.opacity(0.08))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12).stroke(Theme.accent.opacity(0.18), lineWidth: 1)
+        .liquidGlassSurface(
+            cornerRadius: 18,
+            tint: Theme.accent.opacity(0.12),
+            stroke: Theme.accent.opacity(0.22),
+            shadowOpacity: 0.12
         )
-        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
 

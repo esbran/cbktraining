@@ -4,6 +4,8 @@ import SwiftUI
 
 enum Theme {
     static let background = Color(hex: "#0d0d0d")
+    static let backgroundTop = Color(hex: "#101615")
+    static let backgroundBottom = Color(hex: "#090909")
     static let surface = Color(hex: "#161616")
     static let surfaceElevated = Color(hex: "#1a1a1a")
     static let surfaceButton = Color(hex: "#1e1e1e")
@@ -19,6 +21,68 @@ enum Theme {
     static let accentBlue = Color(hex: "#60a5fa")
     static let accentRed = Color(hex: "#f87171")
     static let accentYellow = Color(hex: "#fbbf24")
+}
+
+// MARK: - Liquid Glass surfaces
+
+private struct LiquidGlassSurface: ViewModifier {
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
+    let cornerRadius: CGFloat
+    let tint: Color
+    let stroke: Color
+    let shadowOpacity: Double
+
+    func body(content: Content) -> some View {
+        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+
+        content
+            .background {
+                shape
+                    .fill(reduceTransparency ? tint : tint.opacity(0.55))
+                    .background {
+                        if !reduceTransparency {
+                            shape.fill(.ultraThinMaterial)
+                        }
+                    }
+            }
+            .overlay {
+                shape
+                    .strokeBorder(stroke, lineWidth: 1)
+            }
+            .overlay(alignment: .topLeading) {
+                shape
+                    .strokeBorder(
+                        LinearGradient(
+                            colors: [Color.white.opacity(0.28), Color.white.opacity(0.06), Color.clear],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1
+                    )
+                    .blendMode(.screen)
+            }
+            .shadow(color: Color.black.opacity(shadowOpacity), radius: 18, x: 0, y: 12)
+            .clipShape(shape)
+    }
+}
+
+extension View {
+    func liquidGlassSurface(
+        cornerRadius: CGFloat = 18,
+        tint: Color = Theme.surface,
+        stroke: Color = Color.white.opacity(0.12),
+        shadowOpacity: Double = 0.22
+    ) -> some View {
+        modifier(
+            LiquidGlassSurface(
+                cornerRadius: cornerRadius,
+                tint: tint,
+                stroke: stroke,
+                shadowOpacity: shadowOpacity
+            )
+        )
+    }
 }
 
 // MARK: - Tag style

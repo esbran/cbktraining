@@ -41,12 +41,12 @@ struct ExerciseRowView: View {
             .padding(.horizontal, 15)
             .padding(.vertical, 13)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Theme.surface)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(isOpen ? Theme.dividerMid : Theme.dividerLow, lineWidth: 1)
+            .liquidGlassSurface(
+                cornerRadius: 16,
+                tint: isOpen ? Theme.surfaceElevated : Theme.surface,
+                stroke: isOpen ? Theme.dividerMid : Theme.dividerLow,
+                shadowOpacity: isOpen ? 0.16 : 0.08
             )
-            .clipShape(RoundedRectangle(cornerRadius: 12))
         }
         .buttonStyle(.plain)
     }

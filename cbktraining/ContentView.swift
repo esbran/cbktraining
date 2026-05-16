@@ -14,7 +14,12 @@ struct ContentView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            Theme.background.ignoresSafeArea()
+            LinearGradient(
+                colors: [Theme.backgroundTop, Theme.backgroundBottom],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
@@ -80,12 +85,11 @@ struct HeaderView: View {
                 .font(AppFont.mono(13))
                 .foregroundStyle(Theme.textSecondary)
         }
+        .padding(16)
+        .liquidGlassSurface(cornerRadius: 24, tint: Theme.surface)
         .padding(.horizontal, 20)
-        .padding(.top, 24)
-        .padding(.bottom, 16)
-        .overlay(alignment: .bottom) {
-            Rectangle().fill(Theme.dividerLow).frame(height: 1)
-        }
+        .padding(.top, 18)
+        .padding(.bottom, 12)
     }
 }
 
@@ -106,9 +110,6 @@ struct DayPickerView: View {
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 14)
-            }
-            .overlay(alignment: .bottom) {
-                Rectangle().fill(Theme.dividerLow).frame(height: 1)
             }
             .onChange(of: selected) { _, new in
                 withAnimation(.easeInOut) {
@@ -145,7 +146,7 @@ struct DayPill: View {
         .padding(.vertical, 10)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(isSelected ? Theme.accent.opacity(0.1) : Theme.surface)
+                .fill(isSelected ? Theme.accent.opacity(0.12) : Theme.surface.opacity(0.35))
         )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
@@ -168,16 +169,10 @@ struct BottomNavView: View {
             navButton(title: "← prev", action: onPrev)
             navButton(title: "next →", action: onNext)
         }
+        .padding(8)
+        .liquidGlassSurface(cornerRadius: 28, tint: Theme.surface)
         .padding(.horizontal, 20)
-        .padding(.top, 12)
-        .padding(.bottom, 28)
-        .background(
-            Theme.surface
-                .overlay(alignment: .top) {
-                    Rectangle().fill(Theme.dividerLow).frame(height: 1)
-                }
-                .ignoresSafeArea(edges: .bottom)
-        )
+        .padding(.bottom, 20)
     }
 
     private func navButton(title: String, action: @escaping () -> Void) -> some View {
@@ -187,12 +182,7 @@ struct BottomNavView: View {
                 .foregroundStyle(Theme.textSecondary)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 13)
-                .background(Theme.surfaceButton)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.white.opacity(0.12), lineWidth: 1)
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .liquidGlassSurface(cornerRadius: 20, tint: Theme.surfaceButton, shadowOpacity: 0.08)
         }
         .buttonStyle(.plain)
     }
